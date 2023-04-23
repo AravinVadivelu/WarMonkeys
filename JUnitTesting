@@ -1,0 +1,95 @@
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+
+import org.junit.Before;
+import org.junit.Test;
+
+public class WarGameTest {
+
+    private WarGame game;
+    private Player player1;
+    private Player player2;
+
+    @Before
+    public void setUp() {
+        game = new WarGame();
+        player1 = new Player("Player 1");
+        player2 = new Player("Player 2");
+        game.setPlayers(player1, player2);
+    }
+
+    // Test shuffle method
+    @Test
+    public void testShuffle() {
+        game.shuffleDeck();
+        Deck deck = game.getDeck();
+        Card firstCard = deck.dealCard();
+        assertNotNull(firstCard);
+        assertFalse(deck.isEmpty());
+    }
+
+    // Test dealCards method
+    @Test
+    public void testDealCards() {
+        game.shuffleDeck();
+        game.dealCards();
+        assertEquals(26, player1.getNumCards());
+        assertEquals(26, player2.getNumCards());
+        assertTrue(game.getCurrentRound().isEmpty());
+    }
+
+    // Test playRound method
+    @Test
+    public void testPlayRound() {
+        game.shuffleDeck();
+        game.dealCards();
+        Card player1Card = player1.playCard();
+        Card player2Card = player2.playCard();
+        game.playRound(player1Card, player2Card);
+        assertNotNull(game.getCurrentRoundWinner());
+        assertEquals(2, game.getCurrentRound().size());
+        assertTrue(game.getCurrentRound().contains(player1Card));
+        assertTrue(game.getCurrentRound().contains(player2Card));
+    }
+
+    // Test resolveTie method with good input
+    @Test
+    public void testResolveTieWithGoodInput() {
+        game.shuffleDeck();
+        game.dealCards();
+        ArrayList<Card> player1TieCards = new ArrayList<Card>();
+        player1TieCards.add(new Card(Rank.TWO, Suit.HEARTS));
+        player1TieCards.add(new Card(Rank.THREE, Suit.HEARTS));
+        player1TieCards.add(new Card(Rank.FOUR, Suit.HEARTS));
+        ArrayList<Card> player2TieCards = new ArrayList<Card>();
+        player2TieCards.add(new Card(Rank.TWO, Suit.CLUBS));
+        player2TieCards.add(new Card(Rank.THREE, Suit.CLUBS));
+        player2TieCards.add(new Card(Rank.FOUR, Suit.CLUBS));
+        game.resolveTie(player1TieCards, player2TieCards);
+        assertEquals(6, game.getRoundWinner().getNumCards());
+    }
+
+    // Test resolveTie method with bad input
+    @Test(expected = IllegalArgumentException.class)
+    public void testResolveTieWithBadInput() {
+        game.shuffleDeck();
+        game.dealCards();
+        ArrayList<Card> player1TieCards = new ArrayList<Card>();
+        player1TieCards.add(new Card(Rank.TWO, Suit.HEARTS));
+        ArrayList<Card> player2TieCards = new ArrayList<Card>();
+        game.resolveTie(player1TieCards, player2TieCards);
+    }
+
+    // Test resolveTie method with boundary input
+    @Test
+    public void testResolveTieWithBoundaryInput() {
+        game.shuffleDeck();
+        game.dealCards();
+        ArrayList<Card> player1TieCards = new ArrayList<Card>();
+        player1TieCards.add(new Card(Rank.TWO, Suit.HEARTS));
+        player1TieCards.add(new Card(Rank.THREE,
